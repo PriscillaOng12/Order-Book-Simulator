@@ -36,7 +36,7 @@ Global Electronic Trading Network:
 │             │ • Interest rates, forex   │
 ├─────────────┼───────────────────────────┤
 │     ICE     │ • Energy commodities      │
-│ (Commodities)│ • Agricultural products   │
+│ (Commodities)│ • Agricultural products  │
 │             │ • Global reach            │
 └─────────────┴───────────────────────────┘
                        │
@@ -71,15 +71,15 @@ Most modern exchanges use a **Central Limit Order Book** model, which our simula
 #### CLOB vs. Traditional Market Maker Model
 
 ```
-┌─────────────────────────────────────────┐
-│          CLOB MODEL (Modern)            │
-├─────────────────────────────────────────┤
-│ ✅ No designated market makers required │
+┌────────────────────────────────────────-─┐
+│          CLOB MODEL (Modern)             │
+├─────────────────────────────────────────-┤
+│ ✅ No designated market makers required  │
 │ ✅ All participants can provide liquidity│
-│ ✅ Transparent pricing                  │
-│ ✅ Efficient price discovery            │
-│ ✅ Lower spreads through competition    │
-└─────────────────────────────────────────┘
+│ ✅ Transparent pricing                   │
+│ ✅ Efficient price discovery             │
+│ ✅ Lower spreads through competition     │
+└────────────────────────────────────────--┘
 
 ┌─────────────────────────────────────────┐
 │      SPECIALIST MODEL (Traditional)     │
@@ -316,18 +316,18 @@ Market makers face the challenge of **adverse selection** - trading against info
 Adverse Selection Scenario:
 ┌─────────────────────────────────────────┐
 │ 1. Market maker quotes:                 │
-│    BID: $149.99    ASK: $150.01        │
+│    BID: $149.99    ASK: $150.01         │
 │                                         │
-│ 2. News breaks: Apple beats earnings   │
-│    (Market maker hasn't seen news yet) │
+│ 2. News breaks: Apple beats earnings    │
+│    (Market maker hasn't seen news yet)  │
 │                                         │
-│ 3. Informed traders buy at $150.01     │
-│    (They know price should be higher)  │
+│ 3. Informed traders buy at $150.01      │
+│    (They know price should be higher)   │
 │                                         │
-│ 4. Stock jumps to $151.00              │
+│ 4. Stock jumps to $151.00               │
 │                                         │
-│ 5. Market maker loses $0.99 per share  │
-│    sold at $150.01                     │
+│ 5. Market maker loses $0.99 per share   │
+│    sold at $150.01                      │
 └─────────────────────────────────────────┘
 
 Result: Market maker sold too cheap to informed traders
@@ -479,12 +479,12 @@ Market Impact Example:
 │ Current best ask: $150.00 (500 shares)  │
 │                                         │
 │ Market Order Execution:                 │
-│ • 500 shares @ $150.00 = $75,000       │
-│ • 400 shares @ $150.01 = $60,040       │
-│ • 600 shares @ $150.02 = $90,012       │
-│ • 250 shares @ $150.03 = $37,508       │
+│ • 500 shares @ $150.00 = $75,000        │
+│ • 400 shares @ $150.01 = $60,040        │
+│ • 600 shares @ $150.02 = $90,012        │
+│ • 250 shares @ $150.03 = $37,508        │
 │ • ... (walking up the order book)       │
-│ • 800 shares @ $150.25 = $120,200      │
+│ • 800 shares @ $150.25 = $120,200       │
 │                                         │
 │ Total cost: $15,045,000                 │
 │ Average price: $150.45                  │
