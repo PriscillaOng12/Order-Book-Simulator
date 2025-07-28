@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Book Simulator</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Order Book Simulator</h1>
+    <p>Advanced trading engine with market making, risk management, and performance analytics</p>
+    <div class="status-indicators">
+      <div class="status-item">
+        <span class="status-label">WebSocket:</span>
+        <span id="wsStatus" class="status-value disconnected">Disconnected</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Engine Status:</span>
+        <span id="engineStatus" class="status-value">Loading...</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Orders/sec:</span>
+        <span id="ordersPerSec" class="status-value">0</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tab-nav">
+    <button class="tab-button active" onclick="showTab('trading')">Trading</button>
+    <button class="tab-button" onclick="showTab('analytics')">Analytics</button>
+    <button class="tab-button" onclick="showTab('market-maker')">Market Making</button>
+    <button class="tab-button" onclick="showTab('risk')">Risk Management</button>
+    <button class="tab-button" onclick="showTab('replay')">Data Replay</button>
+  </nav>
+
+  <main>
+    <!-- Trading Tab -->
+    <div id="trading" class="tab-content active">
+      <div class="trading-layout">
+        <section class="order-entry">
+          <h2>📋 Submit Order</h2>
+          <form id="orderForm">
+            <div class="form-grid">
+              <div class="form-row">
+                <label for="owner">Trader ID</label>
+                <input type="text" id="owner" required value="trader1" />
+              </div>
+              <div class="form-row">
+                <label for="symbol">Symbol</label>
+                <select id="symbol">
+                  <option value="AAPL">AAPL</option>
+                  <option value="GOOGL">GOOGL</option>
+                  <option value="MSFT">MSFT</option>
+                  <option value="TSLA">TSLA</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="side">Side</label>
+                <select id="side">
+                  <option value="BUY">Buy</option>
+                  <option value="SELL">Sell</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="type">Order Type</label>
+                <select id="type">
+                  <option value="LIMIT">Limit</option>
+                  <option value="MARKET">Market</option>
+                  <option value="STOP">Stop</option>
+                  <option value="STOP_LIMIT">Stop Limit</option>
+                  <option value="ICEBERG">Iceberg</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="quantity">Quantity</label>
+                <input type="number" id="quantity" min="1" required value="100" />
+              </div>
+              <div class="form-row" id="priceRow">
+                <label for="price">Price</label>
+                <input type="number" step="0.01" id="price" value="150" />
+              </div>
+              <div class="form-row" id="stopPriceRow" style="display: none;">
+                <label for="stopPrice">Stop Price</label>
+                <input type="number" step="0.01" id="stopPrice" />
+              </div>
+              <div class="form-row" id="displayQtyRow" style="display: none;">
+                <label for="displayQty">Display Qty</label>
+                <input type="number" id="displayQty" value="50" />
+              </div>
+              <div class="form-row">
+                <label for="tif">Time In Force</label>
+                <select id="tif">
+                  <option value="GTC">GTC</option>
+                  <option value="IOC">IOC</option>
+                  <option value="FOK">FOK</option>
+                  <option value="DAY">DAY</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="submit-btn">🚀 Submit Order</button>
+          </form>
+          <div id="feedback" class="feedback"></div>
+        </section>
+
+        <section class="market-data">
+          <div class="market-info">
+            <h3 id="currentSymbol">AAPL Market Data</h3>
+            <div class="price-info">
+              <div class="price-item">
+                <span class="label">Best Bid:</span>
+                <span id="bestBid" class="value">-</span>
+              </div>
+              <div class="price-item">
+                <span class="label">Best Ask:</span>
+                <span id="bestAsk" class="value">-</span>
+              </div>
+              <div class="price-item">
+                <span class="label">Spread:</span>
+                <span id="spread" class="value">-</span>
+              </div>
+              <div class="price-item">
+                <span class="label">Last Trade:</span>
+                <span id="lastTrade" class="value">-</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="charts-grid">
+            <div class="chart-container">
+              <h3>📊 Order Book Depth</h3>
+              <canvas id="bookChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>📈 Recent Trades</h3>
+              <canvas id="tradeChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>🕐 OHLC Chart</h3>
+              <canvas id="ohlcChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>📋 Level 3 Data</h3>
+              <div id="level3Data" class="level3-container">
+                <div class="orders-column">
+                  <h4>Bids</h4>
+                  <div id="bidOrders" class="orders-list"></div>
+                </div>
+                <div class="orders-column">
+                  <h4>Asks</h4>
+                  <div id="askOrders" class="orders-list"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Analytics Tab -->
+    <div id="analytics" class="tab-content">
+      <div class="analytics-layout">
+        <section class="metrics-grid">
+          <div class="metric-card">
+            <h3>⚡ System Performance</h3>
+            <div class="metric-value" id="latencyP99">- μs</div>
+            <div class="metric-label">P99 Latency</div>
+          </div>
+          <div class="metric-card">
+            <h3>🎯 Throughput</h3>
+            <div class="metric-value" id="throughput">- ops/s</div>
+            <div class="metric-label">Orders per Second</div>
+          </div>
+          <div class="metric-card">
+            <h3>💹 Market Quality</h3>
+            <div class="metric-value" id="avgSpread">- bps</div>
+            <div class="metric-label">Average Spread</div>
+          </div>
+          <div class="metric-card">
+            <h3>🔄 Total Volume</h3>
+            <div class="metric-value" id="totalVolume">-</div>
+            <div class="metric-label">Shares Traded</div>
+          </div>
+        </section>
+
+        <section class="charts-section">
+          <div class="chart-container full-width">
+            <h3>📊 Performance Metrics Over Time</h3>
+            <canvas id="performanceChart"></canvas>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Market Maker Tab -->
+    <div id="market-maker" class="tab-content">
+      <div class="market-maker-layout">
+        <section class="mm-controls">
+          <h2>🤖 Market Maker Management</h2>
+          <div class="control-buttons">
+            <button id="startMM" class="action-btn start">▶️ Start All</button>
+            <button id="stopMM" class="action-btn stop">⏹️ Stop All</button>
+            <button id="refreshMM" class="action-btn">🔄 Refresh</button>
+          </div>
+          
+          <div class="mm-creation">
+            <h3>Create New Market Maker</h3>
+            <form id="mmForm">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label for="mmSymbol">Symbol</label>
+                  <select id="mmSymbol">
+                    <option value="AAPL">AAPL</option>
+                    <option value="GOOGL">GOOGL</option>
+                    <option value="MSFT">MSFT</option>
+                    <option value="TSLA">TSLA</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label for="mmStrategy">Strategy</label>
+                  <select id="mmStrategy">
+                    <option value="basic">Basic</option>
+                    <option value="inventory_aware">Inventory Aware</option>
+                    <option value="adaptive">Adaptive</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label for="mmSpread">Base Spread (bps)</label>
+                  <input type="number" id="mmSpread" value="10" min="1" max="1000" />
+                </div>
+                <div class="form-row">
+                  <label for="mmSize">Order Size</label>
+                  <input type="number" id="mmSize" value="100" min="10" max="10000" />
+                </div>
+              </div>
+              <button type="submit" class="submit-btn">🚀 Create Market Maker</button>
+            </form>
+          </div>
+        </section>
+
+        <section class="mm-stats">
+          <h3>📈 Market Maker Statistics</h3>
+          <div id="mmStatsContainer">
+            <p>No market makers active</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Risk Management Tab -->
+    <div id="risk" class="tab-content">
+      <div class="risk-layout">
+        <section class="risk-overview">
+          <h2>⚠️ Risk Management</h2>
+          <div class="risk-metrics">
+            <div class="risk-card">
+              <h3>Position Limits</h3>
+              <div id="positionLimits">Loading...</div>
+            </div>
+            <div class="risk-card">
+              <h3>P&L Summary</h3>
+              <div id="pnlSummary">Loading...</div>
+            </div>
+            <div class="risk-card">
+              <h3>Risk Violations</h3>
+              <div id="riskViolations">Loading...</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Data Replay Tab -->
+    <div id="replay" class="tab-content">
+      <div class="replay-layout">
+        <section class="replay-controls">
+          <h2>⏯️ Historical Data Replay</h2>
+          
+          <div class="replay-setup">
+            <h3>Setup Replay Data</h3>
+            <form id="replaySetupForm">
+              <div class="form-grid">
+                <div class="form-row">
+                  <label for="dataType">Data Type</label>
+                  <select id="dataType">
+                    <option value="synthetic">Synthetic Data</option>
+                    <option value="csv">CSV Files</option>
+                    <option value="json">JSON Files</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <label for="replaySymbol">Symbol</label>
+                  <input type="text" id="replaySymbol" value="AAPL" />
+                </div>
+                <div class="form-row">
+                  <label for="replayDays">Days</label>
+                  <input type="number" id="replayDays" value="1" min="1" max="30" />
+                </div>
+                <div class="form-row">
+                  <label for="basePrice">Base Price</label>
+                  <input type="number" id="basePrice" value="150" step="0.01" />
+                </div>
+              </div>
+              <button type="submit" class="submit-btn">📁 Load Data</button>
+            </form>
+          </div>
+
+          <div class="replay-playback">
+            <h3>Playback Controls</h3>
+            <div class="control-buttons">
+              <button id="startReplay" class="action-btn start">▶️ Start</button>
+              <button id="stopReplay" class="action-btn stop">⏹️ Stop</button>
+              <button id="pauseReplay" class="action-btn">⏸️ Pause</button>
+            </div>
+            
+            <div id="replayStats" class="replay-stats">
+              <div class="stat-item">
+                <span class="label">Events Processed:</span>
+                <span id="eventsProcessed">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">Orders Submitted:</span>
+                <span id="ordersSubmitted">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">Trades Generated:</span>
+                <span id="tradesGenerated">0</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>🏗️ Built with advanced order matching engine, market making algorithms, and real-time risk management</p>
+      <p>📊 Features: WebSocket feeds, OHLC data, Level 3 market data, performance analytics</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>
