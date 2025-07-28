@@ -1407,4 +1407,4 @@ class MarketDataService:
 
 ---
 
-*Understanding market microstructure is essential for building realistic trading systems. These concepts explain why certain technical decisions matter and how they connect to real-world trading practices.*
+*These concepts explain why certain technical decisions matter and how they connect to real-world trading practices.*
