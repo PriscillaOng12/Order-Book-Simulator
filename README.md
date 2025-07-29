@@ -1,18 +1,16 @@
-# 🚀 Order Book Simulator
-*PMarket Microstructure Engine with Real-Time Analytics*
+# Order Book Simulator
+*Market Microstructure Engine with Real-Time Analytics*
 
 [![Performance](https://img.shields.io/badge/Throughput-100K+_orders/sec-brightgreen)](docs/BENCHMARKS.md)
 [![Latency](https://img.shields.io/badge/Latency-<1ms_p99-blue)](docs/PERFORMANCE.md)
 [![Architecture](https://img.shields.io/badge/Architecture-Event_Driven-orange)](docs/ARCHITECTURE.md)
 [![Market Data](https://img.shields.io/badge/Market_Data-Level_2/3-purple)](docs/MARKET_DATA.md)
 
-# High-Performance Order Book Simulator
-
-A realistic electronic trading system that implements the core mechanics of modern stock exchanges. I built this to understand how order matching works at places like NYSE and NASDAQ, and ended up creating something that can handle over 100,000 orders per second with sub-millisecond latency.
+A realistic electronic trading system that implements the core mechanics of modern stock exchanges. I built this to better understand how order matching works at exchanges like NYSE and NASDAQ and how an exchange makes itself capable of handling over 100,000 orders per second with sub-millisecond latency.
 
 ## What This Does
 
-This simulates a **Central Limit Order Book (CLOB)** - the heart of every modern exchange. Orders come in, get matched using price-time priority (same logic as real exchanges), and generate trades. It includes:
+This simulates a **Central Limit Order Book (CLOB)** - the heart of every modern exchange. Orders come in, get matched using price-time priority, and generate trades. It includes:
 
 - **Real order types**: Market, limit, stop, iceberg orders
 - **Market making bot**: Provides liquidity and tries to profit from the spread
@@ -23,13 +21,11 @@ This simulates a **Central Limit Order Book (CLOB)** - the heart of every modern
 ## Quick Start
 
 ```bash
-git clone https://github.com/your-username/order-book-simulator
+git clone https://github.com/PriscillaOng12/Order-Book-Simulator
 cd order-book-simulator
 pip install -r requirements.txt
 python web_server.py
 ```
-
-Visit `http://localhost:8080` for the trading interface, or connect to `ws://localhost:8765` for live market data.
 
 ## Core Architecture & Design Decisions
 
@@ -65,7 +61,7 @@ class OrderBook:
         self.best_ask = None
 ```
 
-This gives us the optimal complexity for each operation: O(1) for best price quotes, O(log n) for adding/removing price levels, O(1) for order cancellation.
+This gives the optimal complexity for each operation: O(1) for best price quotes, O(log n) for adding/removing price levels, O(1) for order cancellation.
 
 ## Performance Engineering Deep Dive
 
@@ -112,19 +108,19 @@ class OrderLevel:
 ```
 Load Test Results (1M orders):
 ┌─────────────────────────────────────┐
-│ Metric          │ Before │ After   │
+│ Metric          │ Before │ After    │
 ├─────────────────────────────────────┤
-│ Avg Latency     │ 850μs  │ 127μs   │
-│ 99th Percentile │ 2.1ms  │ 780μs   │
-│ Throughput      │ 45K/s  │ 114K/s  │
-│ Memory Usage    │ 200MB  │ 47MB    │
-│ CPU Utilization │ 85%    │ 34%     │
+│ Avg Latency     │ 850μs  │ 127μs    │
+│ 99th Percentile │ 2.1ms  │ 780μs    │
+│ Throughput      │ 45K/s  │ 114K/s   │
+│ Memory Usage    │ 200MB  │ 47MB     │
+│ CPU Utilization │ 85%    │ 34%      │
 └─────────────────────────────────────┘
 ```
 
 ## Market Making Strategy & Mathematical Modeling
 
-The market making bot implements adaptive strategies based on financial literature:
+The market making bot implements adaptive strategies based on financial models:
 
 ### Inventory Risk Model
 ```python
@@ -162,7 +158,7 @@ def detect_informed_flow(self, recent_trades):
     return imbalance > 0.6
 ```
 
-**Performance**: The bot averages 0.73% daily returns with 2.34 Sharpe ratio in simulation.
+**Performance**: The bot averages **0.73%** daily returns with **2.34 Sharpe** ratio in simulation.
 
 ## Risk Management & Production Reliability
 
@@ -399,5 +395,3 @@ Detailed technical docs in [`docs/`](docs/) covering:
 Python 3.8+, Flask, WebSockets, NumPy
 No external databases - everything in-memory for performance
 ```
-
-Built with ~3,000 lines of Python, focusing on clean, readable code that demonstrates both systems engineering and quantitative finance concepts.
