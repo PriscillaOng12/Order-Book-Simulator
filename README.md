@@ -8,6 +8,12 @@
 
 A realistic electronic trading system that implements the core mechanics of modern stock exchanges. I built this to better understand how order matching works at exchanges like NYSE and NASDAQ and how an exchange makes itself capable of handling over 100,000 orders per second with sub-millisecond latency.
 
+
+
+https://github.com/user-attachments/assets/26231c20-48d2-4033-95c0-a3ad7fb84d78
+
+
+
 ## What This Does
 
 This simulates a **Central Limit Order Book (CLOB)** - the heart of every modern exchange. Orders come in, get matched using price-time priority, and generate trades. It includes:
